@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Landslide Monitoring System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f8;
+            color: #333;
+        }
+
+        header {
+            background: #1f4d3a;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 32px;
+        }
+
+        header p {
+            margin-top: 8px;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .status {
+            text-align: center;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .status h2 {
+            color: #1f4d3a;
+            margin-bottom: 10px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            color: #1f4d3a;
+            margin-bottom: 15px;
+        }
+
+        .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .prediction {
+            margin-top: 30px;
+            padding: 25px;
+            text-align: center;
+            background: #fff3cd;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🌍 Landslide Monitoring System</h1>
+    <p>IoT and Machine Learning Based Early Warning System</p>
+</header>
+
+<div class="container">
+
+    <div class="status">
+        <h2>System Status</h2>
+        <p>ESP32 Sensor Monitoring and Machine Learning Prediction</p>
+    </div>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>🌱 Soil Moisture</h3>
+            <div class="value">--</div>
+        </div>
+
+        <div class="card">
+            <h3>🌧 Rain Level</h3>
+            <div class="value">--</div>
+        </div>
+
+        <div class="card">
+            <h3>📐 Tilt</h3>
+            <div class="value">--</div>
+        </div>
+
+        <div class="card">
+            <h3>📳 Vibration</h3>
+            <div class="value">--</div>
+        </div>
+
+    </div>
+
+    <div class="prediction">
+        Landslide Prediction: {{ prediction if prediction else "Waiting for sensor data..." }}
+    </div>
+
+</div>
+
+<footer>
+    Landslide Monitoring System | ESP32 + Machine Learning
+</footer>
+
+</body>
+</html>
