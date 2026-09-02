@@ -18,19 +18,21 @@ latest_data = {
 }
 
 
-# Home page - Landslide Monitoring Dashboard
+# Home page - Dashboard
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-# API endpoint - receives data from ESP32/Wokwi
+# Receive sensor data from ESP32
 @app.route("/predict", methods=["POST"])
 def predict():
+
     global latest_data
 
     try:
-        # Receive JSON data from ESP32
+
+        # Receive JSON data
         data = request.get_json()
 
         # Get sensor values
@@ -39,7 +41,7 @@ def predict():
         tilt = float(data["tilt"])
         vibration = float(data["vibration"])
 
-        # Arrange features exactly like the ML training data
+        # Arrange features for ML model
         features = np.array([[
             soil_moisture,
             rain_level,
@@ -47,10 +49,10 @@ def predict():
             vibration
         ]])
 
-        # Make prediction using trained ML model
+        # ML Prediction
         prediction = model.predict(features)[0]
 
-        # Save latest data for dashboard
+        # Save latest sensor data for dashboard
         latest_data = {
             "soil_moisture": soil_moisture,
             "rain_level": rain_level,
@@ -65,16 +67,19 @@ def predict():
         })
 
     except Exception as e:
+
         return jsonify({
             "error": str(e)
         }), 400
 
 
-# API endpoint for dashboard to get latest sensor data
+# Dashboard gets latest sensor data
 @app.route("/data", methods=["GET"])
 def get_data():
+
     return jsonify(latest_data)
 
 
 if __name__ == "__main__":
+
     app.run(host="0.0.0.0", port=5000)
