@@ -8,6 +8,16 @@ app = Flask(__name__)
 model = joblib.load("landslide_model.pkl")
 
 
+# Store the latest sensor data
+latest_data = {
+    "soil_moisture": None,
+    "rain_level": None,
+    "tilt": None,
+    "vibration": None,
+    "prediction": "Waiting for sensor data..."
+}
+
+
 # Home page - Landslide Monitoring Dashboard
 @app.route("/")
 def home():
@@ -17,6 +27,8 @@ def home():
 # API endpoint - receives data from ESP32/Wokwi
 @app.route("/predict", methods=["POST"])
 def predict():
+    global latest_data
+
     try:
         # Receive JSON data from ESP32
         data = request.get_json()
@@ -38,6 +50,15 @@ def predict():
         # Make prediction using trained ML model
         prediction = model.predict(features)[0]
 
+        # Save latest data for dashboard
+        latest_data = {
+            "soil_moisture": soil_moisture,
+            "rain_level": rain_level,
+            "tilt": tilt,
+            "vibration": vibration,
+            "prediction": str(prediction)
+        }
+
         # Send prediction back to ESP32
         return jsonify({
             "prediction": str(prediction)
@@ -47,6 +68,12 @@ def predict():
         return jsonify({
             "error": str(e)
         }), 400
+
+
+# API endpoint for dashboard to get latest sensor data
+@app.route("/data", methods=["GET"])
+def get_data():
+    return jsonify(latest_data)
 
 
 if __name__ == "__main__":
