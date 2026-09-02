@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -116,28 +117,28 @@
 
         <div class="card">
             <h3>🌱 Soil Moisture</h3>
-            <div class="value">--</div>
+            <div class="value" id="soil">--</div>
         </div>
 
         <div class="card">
             <h3>🌧 Rain Level</h3>
-            <div class="value">--</div>
+            <div class="value" id="rain">--</div>
         </div>
 
         <div class="card">
             <h3>📐 Tilt</h3>
-            <div class="value">--</div>
+            <div class="value" id="tilt">--</div>
         </div>
 
         <div class="card">
             <h3>📳 Vibration</h3>
-            <div class="value">--</div>
+            <div class="value" id="vibration">--</div>
         </div>
 
     </div>
 
-    <div class="prediction">
-        Landslide Prediction: {{ prediction if prediction else "Waiting for sensor data..." }}
+    <div class="prediction" id="prediction">
+        Landslide Prediction: Waiting for sensor data...
     </div>
 
 </div>
@@ -145,6 +146,54 @@
 <footer>
     Landslide Monitoring System | ESP32 + Machine Learning
 </footer>
+
+
+<script>
+
+    async function updateDashboard() {
+
+        try {
+
+            const response = await fetch("/data");
+
+            const data = await response.json();
+
+            document.getElementById("soil").innerText =
+                data.soil_moisture ?? "--";
+
+            document.getElementById("rain").innerText =
+                data.rain_level ?? "--";
+
+            document.getElementById("tilt").innerText =
+                data.tilt !== null && data.tilt !== undefined
+                    ? Number(data.tilt).toFixed(2)
+                    : "--";
+
+            document.getElementById("vibration").innerText =
+                data.vibration == 1 ? "YES" : "NO";
+
+            document.getElementById("prediction").innerText =
+                "Landslide Prediction: " +
+                (data.prediction || "Waiting for sensor data...");
+
+        }
+
+        catch (error) {
+
+            console.log("Error getting sensor data:", error);
+
+        }
+
+    }
+
+
+    // Update immediately
+    updateDashboard();
+
+    // Update every 3 seconds
+    setInterval(updateDashboard, 3000);
+
+</script>
 
 </body>
 </html>
