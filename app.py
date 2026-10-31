@@ -4,82 +4,93 @@ import numpy as np
 
 app = Flask(__name__)
 
-# Load the trained Machine Learning model
+# Load the newly trained model
 model = joblib.load("landslide_model.pkl")
 
-
-# Store the latest sensor data
+# Store latest sensor data
 latest_data = {
     "soil_moisture": None,
     "rain_level": None,
+    "soil_wetness": None,
+    "rain_wetness": None,
     "tilt": None,
     "vibration": None,
     "prediction": "Waiting for sensor data..."
 }
 
 
-# Home page - Dashboard
+# Dashboard home page
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-# Receive sensor data from ESP32
+# Receive ESP32 sensor data
 @app.route("/predict", methods=["POST"])
 def predict():
 
     global latest_data
 
     try:
-
-        # Receive JSON data
         data = request.get_json()
 
-        # Get sensor values
-        soil_moisture = float(data["soil_moisture"])
-        rain_level = float(data["rain_level"])
+        if data is None:
+            return jsonify({"error": "No JSON data received"}), 400
+
+        # Get raw sensor readings
+        soil_raw = float(data["soil_moisture"])
+        rain_raw = float(data["rain_level"])
         tilt = float(data["tilt"])
         vibration = float(data["vibration"])
 
-        # Arrange features for ML model
+        # Validate ADC readings
+        if not (0 <= soil_raw <= 4095):
+            raise ValueError("Invalid soil ADC reading")
+
+        if not (0 <= rain_raw <= 4095):
+            raise ValueError("Invalid rain ADC reading")
+
+        # Convert raw ADC into wetness scale
+        # 0 = dry, 4095 = wet
+        soil_wetness = 4095 - soil_raw
+        rain_wetness = 4095 - rain_raw
+
+        # Prepare ML features
         features = np.array([[
-            soil_moisture,
-            rain_level,
+            soil_wetness,
+            rain_wetness,
             tilt,
             vibration
         ]])
 
-        # ML Prediction
+        # Predict landslide risk
         prediction = model.predict(features)[0]
 
-        # Save latest sensor data for dashboard
+        # Store latest readings
         latest_data = {
-            "soil_moisture": soil_moisture,
-            "rain_level": rain_level,
+            "soil_moisture": soil_raw,
+            "rain_level": rain_raw,
+            "soil_wetness": soil_wetness,
+            "rain_wetness": rain_wetness,
             "tilt": tilt,
             "vibration": vibration,
             "prediction": str(prediction)
         }
 
-        # Send prediction back to ESP32
+        # Send prediction to ESP32
         return jsonify({
             "prediction": str(prediction)
         })
 
     except Exception as e:
-
-        return jsonify({
-            "error": str(e)
-        }), 400
+        return jsonify({"error": str(e)}), 400
 
 
-# Dashboard gets latest sensor data
+# Dashboard data endpoint
 @app.route("/data", methods=["GET"])
 def get_data():
-
     return jsonify(latest_data)
 
 
 if __name__ == "__main__":
-
     app.run(host="0.0.0.0", port=5000)
